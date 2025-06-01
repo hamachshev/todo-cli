@@ -26,6 +26,10 @@ enum Commands {
         /// Number of the item to mark as done
         item: u16,
     },
+    Unmark {
+        /// Number of the item to mark as done
+        item: u16,
+    },
     /// Delete a todo item
     Delete {
         /// Number of the item to delete
@@ -50,8 +54,31 @@ fn main() {
         }
         Commands::Mark { item } => {
             println!("marking item as done: {}", item);
+            if *item > todos.len() as u16 || *item == 0 {
+                println!("Invalid item number: {}", item);
+                return;
+            }
             let index = *item as usize - 1;
+            if &todos[index][0..2] == "x " {
+                println!("Item {} is already marked as done.", item);
+                return;
+            }
             todos[index] = format!("x {}", &todos[index][2..]);
+            list_todos(&todos);
+            save_todos(&todos);
+        }
+        Commands::Unmark { item } => {
+            println!("unmarking item as done: {}", item);
+            if *item > todos.len() as u16 || *item == 0 {
+                println!("Invalid item number: {}", item);
+                return;
+            }
+            let index = *item as usize - 1;
+            if &todos[index][0..2] == "- " {
+                println!("Item {} is already marked as incomplete.", item);
+                return;
+            }
+            todos[index] = format!("- {}", &todos[index][2..]);
             list_todos(&todos);
             save_todos(&todos);
         }
