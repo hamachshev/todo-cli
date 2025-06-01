@@ -9,7 +9,7 @@ use std::{
 /// A simple todo list application
 struct Cli {
     #[command(subcommand)]
-    command: Option<Commands>,
+    command: Commands,
 }
 
 #[derive(Subcommand)]
@@ -26,6 +26,11 @@ enum Commands {
         /// Number of the item to mark as done
         item: u16,
     },
+    /// Delete a todo item
+    Delete {
+        /// Number of the item to delete
+        item: u16,
+    },
 }
 
 fn main() {
@@ -34,23 +39,29 @@ fn main() {
     let cli = Cli::parse();
 
     match &cli.command {
-        Some(Commands::Add { item }) => {
+        Commands::Add { item } => {
             println!("adding item: {}", item);
             todos.push(format!("- {}", item).to_string());
             save_todos(&todos);
         }
-        Some(Commands::List) => {
+        Commands::List => {
             println!("listing all todos:");
             list_todos(&todos);
         }
-        Some(Commands::Mark { item }) => {
+        Commands::Mark { item } => {
             println!("marking item as done: {}", item);
             let index = *item as usize - 1;
             todos[index] = format!("x {}", &todos[index][2..]);
             list_todos(&todos);
             save_todos(&todos);
         }
-        None => {}
+        Commands::Delete { item } => {
+            println!("deleting: {}", item);
+            let index = *item as usize - 1;
+            todos.remove(index);
+            list_todos(&todos);
+            save_todos(&todos);
+        }
     }
 }
 
